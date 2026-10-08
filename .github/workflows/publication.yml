@@ -24,10 +24,6 @@ jobs:
           rm -rf ./build/maven/.git/*
           chmod +x ./gradlew
           ./gradlew publish -iS
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Package
-          path: build/libs
       - name: Get tag version
         id: get_version
         uses: olegtarasov/get-tag@v2.1
