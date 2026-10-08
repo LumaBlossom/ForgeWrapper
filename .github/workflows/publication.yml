@@ -31,7 +31,7 @@ jobs:
       - name: Get tag version
         id: get_version
         uses: olegtarasov/get-tag@v2.1
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: Package
           path: build/libs
