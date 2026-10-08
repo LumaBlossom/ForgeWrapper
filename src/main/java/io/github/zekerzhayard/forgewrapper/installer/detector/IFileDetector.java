@@ -1,11 +1,11 @@
 package io.github.zekerzhayard.forgewrapper.installer.detector;
 
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-
-import cpw.mods.modlauncher.Launcher;
 
 public interface IFileDetector {
     /**
@@ -29,9 +29,45 @@ public interface IFileDetector {
             return Paths.get(libraryDir).toAbsolutePath();
         }
         try {
-            Path launcher = Paths.get(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toAbsolutePath();
-            //              /<version>  /modlauncher/mods       /cpw        /libraries
-            return launcher.getParent().getParent().getParent().getParent().getParent().toAbsolutePath();
+            URL launcherLocation = null;
+            String[] classNames = {
+                "cpw/mods/modlauncher/Launcher.class",
+                "net/neoforged/fml/loading/FMLLoader.class"
+            };
+
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            for (String classResource : classNames) {
+                URL url = cl.getResource(classResource);
+                if (url != null) {
+                    String path = url.toString();
+                    if (path.startsWith("jar:") && path.contains("!")) {
+                        path = path.substring(4, path.indexOf('!'));
+                        try {
+                            launcherLocation = new URL(path);
+                            break;
+                        } catch (MalformedURLException e) {
+                        }
+                    } else {
+                        try {
+                            launcherLocation = url;
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            }
+
+            if (launcherLocation == null) {
+                throw new UnsupportedOperationException("Could not detect the libraries folder - it can be manually specified with `-Dforgewrapper.librariesDir=` (Java runtime argument)");
+            }
+
+            Path launcher = Paths.get(launcherLocation.toURI());
+            while (!launcher.getFileName().toString().equals("libraries")) {
+                launcher = launcher.getParent();
+                if (launcher == null || launcher.getFileName() == null) {
+                    throw new UnsupportedOperationException("Could not detect the libraries folder - it can be manually specified with `-Dforgewrapper.librariesDir=` (Java runtime argument)");
+                }
+            }
+            return launcher.toAbsolutePath();
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
