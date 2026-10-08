@@ -1,4 +1,4 @@
-# ForgeWrapper
+# ForgeWrapper (For LumaLauncher)
 
 Allow [MultiMC](https://github.com/MultiMC/MultiMC5) to launch Minecraft 1.13+ with Forge.
 
