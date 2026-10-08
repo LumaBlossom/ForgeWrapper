@@ -23,16 +23,11 @@ jobs:
           java-version: '8'
           cache: gradle
 
-      - name: Checkout maven branch
-        uses: actions/checkout@v4
-        with:
-          ref: maven
-          path: build/maven
-
       - name: Build with Gradle
         env:
           IS_PUBLICATION: true
         run: |
+          git clone --depth 1 -b maven https://github.com/ZekerZhayard/ForgeWrapper.git ./build/maven
           rm -rf ./build/maven/.git
           chmod +x ./gradlew
           ./gradlew publish -iS
@@ -51,9 +46,3 @@ jobs:
           draft: false
           prerelease: false
           files: build/libs/*
-
-      - name: Deploy to Maven branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: maven
-          folder: build/maven
